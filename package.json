@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "nvdaz/apollo-server-query-complexity-plugin"
+    "url": "nvdaz/apollo-server-plugin-query-complexity"
   },
   "peerDependencies": {
     "graphql": "^15.0.0",
