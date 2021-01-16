@@ -1,6 +1,6 @@
 {
   "name": "apollo-server-plugin-query-complexity",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Apollo server plugin that limits query complexity.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
