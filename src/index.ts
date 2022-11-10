@@ -1,2 +1,5 @@
-export { default } from './ApolloServerPluginQueryComplexity';
-export type { Options } from './ApolloServerPluginQueryComplexity';
+export {
+  default,
+  QueryComplexityError,
+} from './ApolloServerPluginQueryComplexity.js';
+export type { Options } from './ApolloServerPluginQueryComplexity.js';

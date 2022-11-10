@@ -1,29 +1,58 @@
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
-import { separateOperations } from 'graphql';
+import assert from 'assert';
+import { ApolloServerPlugin } from '@apollo/server';
+import { GraphQLError } from 'graphql';
 import { ComplexityEstimator, getComplexity } from 'graphql-query-complexity';
 
 export interface Options {
   estimators: ComplexityEstimator[];
   maximumComplexity: number;
 }
+export class QueryComplexityError extends GraphQLError {
+  constructor(complexity: number, maximumComplexity: number) {
+    super(
+      `Query is too complex. Requested complexity ${complexity} is greater than maximum allowed ${maximumComplexity}.`,
+      {
+        extensions: {
+          code: 'QUERY_TOO_COMPLEX',
+          complexity,
+          maximumComplexity,
+        },
+      },
+    );
+  }
+}
 
 export default function plugin(options: Options): ApolloServerPlugin {
+  assert(
+    typeof options === 'object' && options !== null,
+    'options is required',
+  );
+  assert(
+    Array.isArray(options.estimators),
+    'options.estimators must be an array.',
+  );
+  assert(
+    typeof options.maximumComplexity === 'number' &&
+      options.maximumComplexity > 0,
+    'options.maximumComplexity must be a positive number.',
+  );
+
   return {
-    requestDidStart({ schema }) {
+    async requestDidStart({ schema }) {
       return {
-        didResolveOperation({ request, document }) {
+        async didResolveOperation({ request, document }) {
           const complexity = getComplexity({
             schema,
-            query: request.operationName
-              ? separateOperations(document)[request.operationName]
-              : document,
+            operationName: request.operationName,
+            query: document,
             estimators: options.estimators,
             variables: request.variables,
           });
 
           if (complexity > options.maximumComplexity) {
-            throw new Error(
-              `Query is too complex. Requested complexity ${complexity} is greater than ${options.maximumComplexity}.`
+            throw new QueryComplexityError(
+              complexity,
+              options.maximumComplexity,
             );
           }
         },
